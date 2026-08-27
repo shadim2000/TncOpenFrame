@@ -51,22 +51,31 @@ behaviour the Docker Compose/Traefik production setup implements).
 
 ## 3. Push this repo to GitHub
 
+The code lives in `shadim2000/TncOpenFrame`. If you cloned it fresh:
+
+```bash
+git clone https://github.com/shadim2000/TncOpenFrame.git
+cd TncOpenFrame
+```
+
+If you are pushing this tree to a new remote:
+
 ```bash
 # from the repo root on your machine
-git remote add origin https://github.com/shadim2000/freeframe.git
-git branch -M stable
+git remote add origin https://github.com/shadim2000/TncOpenFrame.git
 git push -u origin stable
 ```
 
-(If you prefer, rename the default branch to `main` and push that instead. The rest
-of this guide assumes the branch is `stable`.)
+The default branch is `stable` (mirrors the upstream FreeFrame release channel the
+production compose is built around); `main` is kept in sync. Pick either when you
+connect Railway — the rest of this guide assumes `stable`.
 
 ---
 
 ## 4. Create the Railway project and services
 
 1. In Railway, click **New Project** → **Deploy from GitHub repo** → pick
-   `shadim2000/freeframe` (branch `stable`).
+   `shadim2000/TncOpenFrame` (branch `stable`).
 2. Railway may auto-create one service from `railway.json`. We'll configure the
    full set manually. Create the following services (New Service → Dockerfile
    from repo root, or right-click → Configure):
