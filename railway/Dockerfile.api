@@ -1,0 +1,34 @@
+FROM python:3.11-slim
+
+WORKDIR /workspace
+
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    imagemagick \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install API dependencies
+COPY apps/api/requirements.txt /workspace/apps/api/requirements.txt
+RUN pip install --no-cache-dir -r /workspace/apps/api/requirements.txt
+RUN pip install --no-cache-dir gunicorn
+
+# Copy transcoder package and API
+COPY packages/transcoder /workspace/packages/transcoder
+COPY apps/api /workspace/apps/api
+
+# Create non-root user
+RUN adduser --disabled-password --no-create-home appuser
+
+WORKDIR /workspace
+
+USER appuser
+
+EXPOSE 8000
+
+# Default: run the API server, running DB migrations first.
+# Railway services that are Celery workers/beat override CMD with their start command.
+# Bind on dual-stack [::]:8000 so the service is reachable on BOTH the public IPv4
+# edge and Railway's IPv6 private network (api.railway.internal) — binding to
+# 0.0.0.0 only would break private networking.
+CMD ["sh", "-c", "cd /workspace/apps/api && alembic upgrade head && cd /workspace && gunicorn apps.api.main:app -w ${API_WORKERS:-4} -k uvicorn.workers.UvicornWorker --bind [::]:8000 --timeout 120 --graceful-timeout 30"]
